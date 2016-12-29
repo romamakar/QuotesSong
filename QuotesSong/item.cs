@@ -6,7 +6,7 @@ namespace QuotesSong
 /// Class-helper for serialization of dictionary
 /// </summary>
     public class item
-    { 
+    {
         [XmlAttribute]
         public string id;
         [XmlAttribute]
