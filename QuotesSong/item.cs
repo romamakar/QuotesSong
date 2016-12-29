@@ -8,7 +8,7 @@ namespace QuotesSong
     public class item
     {
         [XmlAttribute]
-        public string iываываd;
+        public string id;
         [XmlAttribute]
         public string value;
     }
