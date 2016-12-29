@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<items xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <item id="Просто Радіо Київ" value="http://radioscope.in.ua/prosto-radio-kiev/" />
+  <item id="Просто Радіо Одеса" value="http://radioscope.in.ua/prosto-radio-odessa/" />
+  <item id="Бізнес Радіо" value="http://radioscope.in.ua/bussines/" />
+  <item id="Люкс ФМ" value="http://radioscope.in.ua/luxfm/" />
+  <item id="Радіо 24" value="http://radioscope.in.ua/radio24/" />
+  <item id="Діджей ФМ" value="http://radioscope.in.ua/djfm/" />
+  <item id="Народне Радіо Одеса" value="http://radioscope.in.ua/narodnoe-odessa/" />
+  <item id="Народне Радіо Київ" value="http://radioscope.in.ua/narodnoe-kiev/" />
+  <item id="Любімоє Радіо" value="http://radioscope.in.ua/lubimoe/" />
+  <item id="Ретро ФМ" value="http://radioscope.in.ua/retrofm/" />
+  <item id="Кісс ФМ" value="http://radioscope.in.ua/kissfm/" />
+  <item id="Радіорокс" value="http://radioscope.in.ua/radiorocks/" />
+  <item id="Наше радіо" value="http://radioscope.in.ua/nasheradio/" />
+  <item id="Авто радіо" value="http://radioscope.in.ua/avtoradio/" />
+  <item id="Радіо Енерджі" value="http://radioscope.in.ua/nrj/" />
+  <item id="Європа плюс Київ" value="http://radioscope.in.ua/europaplus-kiev/" />
+  <item id="Радіо Мелодія" value="http://radioscope.in.ua/radiomelodia/" />
+  <item id="Русскоє Радіо" value="http://radioscope.in.ua/russkoe/" />
+  <item id="Радіо Релакс" value="http://radioscope.in.ua/radiorelax/" />
+  <item id="Радіо Шансон" value="http://radioscope.in.ua/shanson/" />
+  <item id="Джем ФМ" value="http://radioscope.in.ua/jamfm/" />
+  <item id="Країна ФМ" value="http://radioscope.in.ua/krainafm/" />
+  <item id="Хіт ФМ" value="http://radioscope.in.ua/hitfm/" />
+  <item id="Радіо Пятниця" value="http://radioscope.in.ua/radiopyatnica/" />
+  <item id="Лаунж ФМ" value="http://radioscope.in.ua/loungefm/" />
+  <item id="Ностальжи" value="http://radioscope.in.ua/nostalgie/" />
+  <item id="Перець ФМ" value="http://radioscope.in.ua/perecfm/" />
+</items>
