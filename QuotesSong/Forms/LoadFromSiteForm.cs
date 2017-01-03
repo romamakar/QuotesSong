@@ -86,7 +86,7 @@ namespace QuotesSong.Forms
                     songcl.Duration = Crud.GetMinAndSecFromText(durationstring[k]);
                     songcl.Country = string.Empty;
                     songcl.Language = Crud.ReturnUkrLangForSong(songcl.Name);
-                    songcl.dt = dt.AddHours(Convert.ToInt32((songtime[k].Replace(" - ", "|").Split('|')[0].Split(':')[0].Replace("[", "")))).AddMinutes(Convert.ToInt32((songtime[k].Replace(" - ", "|").Split('|')[0].Split(':')[1].Replace("]", ""))));
+                    songcl.dt = dt.AddHours(Convert.ToInt32((songtime[k].Replace(" - ", "|").Split('|')[1].Split(':')[0].Replace("[", "")))).AddMinutes(Convert.ToInt32((songtime[k].Replace(" - ", "|").Split('|')[1].Split(':')[1].Replace("]", ""))));
                     //TODO  all languages and countries
                     songslist.Add(songcl);
                 }

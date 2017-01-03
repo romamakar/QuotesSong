@@ -278,7 +278,6 @@ namespace QuotesSong
         }
         private void DrawLegend()
         {
-
             // mainChart
             mainChart.Legends.Clear();
 
@@ -458,7 +457,6 @@ namespace QuotesSong
                 {
                     if (series.GetCustomProperty(c_checkCustomPropertyName) == c_checkedString)
                     {
-
                         series.SetCustomProperty(c_checkCustomPropertyName, c_uncheckedString);
                         series.CustomProperties = series.CustomProperties;
                         mainChart.Series[seriesNo].Enabled = false;
@@ -481,15 +479,14 @@ namespace QuotesSong
             {
                 float quotes = cryteryCheckBoxTable.Text == "Країна" ? Settings.Default.quotesUkrCountry : Settings.Default.quotesUkrLang;
                 string nametype = cryteryCheckBoxTable.Text == "Країна" ? "Україна" : "Українська";
-                foreach (DataGridViewRow data in mainGrid.Rows)
+                foreach (DataGridViewRow data in mainGrid.Rows.Cast<DataGridViewRow>().Where(x=>x.Visible==true))
                 {
                     float percent;
                     if (float.TryParse(data.Cells[nametype].Value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out percent))
                     {
                         data.Visible = quotes > percent;
                     }
-                }
-                mainGrid.Refresh();
+                }              
             }
             else
             {
@@ -509,12 +506,11 @@ namespace QuotesSong
                         }
                     }
                 }
-                mainGrid.Refresh();
-                currencyManager1.ResumeBinding();
             }
+            mainGrid.Refresh();
+            currencyManager1.ResumeBinding();
             toolStripStatusLabel1.Text = string.Format("Кількість записів: {0}", mainGrid.Rows.Cast<DataGridViewRow>().Where(y => y.Visible == true).Count());
         }
-
         #endregion
     }
 }
