@@ -180,7 +180,7 @@ namespace QuotesSong
                         }
                         reader.Close();
 
-                        cmd = new SQLiteCommand("insert into Playlist (station_id, song_id, duration, datetimesong, site) values (@stationid, @songid, @duration, @datetimesong, @site) ", conf);
+                        cmd = new SQLiteCommand("insert into Playlist (station_id, song_id, duration, datetimesong, site) Select @stationid, @songid, @duration, @datetimesong, @site  WHERE (select count(*) from Playlist where station_id=@stationid and song_id=@songid and duration=@duration and datetimesong=@datetimesong )<1 ", conf);
                         cmd.Parameters.AddWithValue("@stationid", radiostationid);
                         cmd.Parameters.AddWithValue("@songid", songid);
                         cmd.Parameters.AddWithValue("@duration", song.Duration);
@@ -193,7 +193,6 @@ namespace QuotesSong
         }
         public static void InsertIntoPlaylist(string name, string author, string radiostation, int duration, string site, DateTime? date)
         {
-
             string datestr = date != null ? date.Value.ToString("yyyy-MM-dd HH:mm:ss") : string.Empty;
             using (SQLiteConnection conf = new SQLiteConnection())
             {
@@ -221,7 +220,7 @@ namespace QuotesSong
                 }
                 reader.Close();
 
-                cmd = new SQLiteCommand("insert into Playlist (station_id, song_id, duration, datetimesong, site) values (@stationid, @songid, @duration, @datetimesong, @site) ", conf);
+                cmd = new SQLiteCommand("insert into Playlist (station_id, song_id, duration, datetimesong, site) Select @stationid, @songid, @duration, @datetimesong, @site  WHERE (select count(*) from Playlist where station_id=@stationid and song_id=@songid and duration=@duration and datetimesong=@datetimesong )<1 ", conf);
                 cmd.Parameters.AddWithValue("@stationid", radiostationid);
                 cmd.Parameters.AddWithValue("@songid", songid);
                 cmd.Parameters.AddWithValue("@duration", duration);
@@ -233,7 +232,6 @@ namespace QuotesSong
         }
         public static void UpdatePlaylist(int id, string name, string author, int duration)
         {
-
             int songid = 0;
             using (SQLiteConnection conf = new SQLiteConnection())
             {
@@ -337,7 +335,7 @@ namespace QuotesSong
         #endregion
        
         #region additional operations
-        public static string BuildSelectForMain(string type, DateTime dtFrom, DateTime dtTo)
+        public static StringBuilder BuildSelectForMainSum(string type, DateTime dtFrom, DateTime dtTo)
         {
             string[] items;
             if (type == "Language")
@@ -366,9 +364,40 @@ namespace QuotesSong
             }
             sb.AppendFormat(" left join (select PlayList.station_id, count(*) as unknowncounters  from playlist join song on playlist.song_id=song.Id where ({0} = '' or {0} is null) and (Playlist.Datetimesong between \u0022{1}\u0022 and \u0022{2}\u0022) and (playlist.song_id<>0)GROUP BY PlayList.station_id) cnt on radio.id=cnt.station_id", type, DateTimeSQLite(dtFrom), DateTimeSQLite(dtTo));
             sb.Append(" GROUP BY radio.Name");
-            return sb.ToString();
+            return sb;
         }
-        public static string BuildSelectForChartOneDay(string type, DateTime dtFrom, DateTime dtTo, string radiostation)
+        public static StringBuilder BuildSelectForMainCount(string type, DateTime dtFrom, DateTime dtTo)
+        {
+            string[] items;
+            if (type == "Language")
+                items = new Crud().listLanguage;
+            else
+                items = new Crud().listCountry;
+            StringBuilder sb = new StringBuilder();
+            sb.Append(" SELECT radio.Name");
+            for (int i = 0; i < items.Count(); i++)
+            {
+                if (!string.IsNullOrEmpty(items[i]))
+                {
+                    items[i] = items[i].Replace("'", "''");
+                    sb.AppendFormat(" , printf(\u0022 % .2f\u0022, (printf(\u0022 % .2f\u0022, t{0}sum.t{0}sum)/printf(\u0022 % .2f\u0022, tsum.allsum))*100) as {1}", i, items[i]);
+                }
+            }
+            sb.Append(" , printf(\u0022  %i\u0022,cnt.unknowncounters) as unk");
+
+            sb.AppendFormat(" FROM Radiostation radio  left JOIN (SELECT PlayList.station_id, COUNT(PlayList.duration) AS allsum FROM PlayList  JOIN Song ON PlayList.song_id = Song.Id where Playlist.Datetimesong between \u0022{0}\u0022 and \u0022{1}\u0022 and Playlist.duration>=90 GROUP BY PlayList.station_id) tsum ON radio.Id = tsum.station_id", DateTimeSQLite(dtFrom), DateTimeSQLite(dtTo));
+            for (int i = 0; i < items.Count(); i++)
+            {
+                if (!string.IsNullOrEmpty(items[i]))
+                {
+                    sb.AppendFormat("  left JOIN(SELECT PlayList.station_id, COUNT(PlayList.duration) AS t{0}sum FROM PlayList  JOIN Song ON PlayList.song_id = Song.Id where {1} = '{2}' and Playlist.Datetimesong between \u0022{3}\u0022 and \u0022{4}\u0022 and Playlist.duration>=90 GROUP BY PlayList.station_id) t{0}sum ON radio.Id = t{0}sum.station_id", i, type, items[i], DateTimeSQLite(dtFrom), DateTimeSQLite(dtTo));
+                }
+            }
+            sb.AppendFormat(" left join (select PlayList.station_id, count(*) as unknowncounters  from playlist join song on playlist.song_id=song.Id where ({0} = '' or {0} is null) and (Playlist.Datetimesong between \u0022{1}\u0022 and \u0022{2}\u0022) and (playlist.song_id<>0) and (Playlist.duration>=90) GROUP BY PlayList.station_id) cnt on radio.id=cnt.station_id", type, DateTimeSQLite(dtFrom), DateTimeSQLite(dtTo));
+            sb.Append(" GROUP BY radio.Name");
+            return sb;
+        }
+        public static StringBuilder BuildSelectForChartOneDaySum(string type, DateTime dtFrom, DateTime dtTo, string radiostation)
         {
             radiostation = radiostation.Replace("'", "''");
             string[] items;
@@ -396,10 +425,10 @@ namespace QuotesSong
                 }
             }
             sb.AppendFormat(" GROUP BY radio.Name having radio.name like '{0}'", radiostation);
-            return sb.ToString();
+            return sb;
 
         }
-        public static string BuildSelectForChart(string type, DateTime dtFrom, DateTime dtTo, string radiostation)
+        public static StringBuilder BuildSelectForChartSum(string type, DateTime dtFrom, DateTime dtTo, string radiostation)
         {
             radiostation = radiostation.Replace("'", "''");
             string[] items;
@@ -427,9 +456,72 @@ namespace QuotesSong
                 }
             }
             sb.AppendFormat(" GROUP BY radio.Name having radio.name like '{0}'", radiostation);
-            return sb.ToString();
+            return sb;
 
         }
+        public static StringBuilder BuildSelectForChartOneDayCount(string type, DateTime dtFrom, DateTime dtTo, string radiostation)
+        {
+            radiostation = radiostation.Replace("'", "''");
+            string[] items;
+            if (type == "Language")
+                items = new Crud().listLanguage;
+            else
+                items = new Crud().listCountry;
+            StringBuilder sb = new StringBuilder();
+            sb.Append(" SELECT radio.Name");
+            for (int i = 0; i < items.Count(); i++)
+            {
+                if (!string.IsNullOrEmpty(items[i]))
+                {
+                    items[i] = items[i].Replace("'", "''");
+                    sb.AppendFormat(" , printf(\u0022 % .2f\u0022, (printf(\u0022 % .2f\u0022, t{0}sum.t{0}sum)/printf(\u0022 % .2f\u0022, tsum.allsum))*100) as {1}", i, items[i]);
+                }
+            }
+
+            sb.AppendFormat(" FROM Radiostation radio left JOIN (SELECT PlayList.station_id, COUNT(PlayList.duration) AS allsum FROM PlayList  JOIN Song ON PlayList.song_id = Song.Id where Playlist.Datetimesong >= \u0022{0}\u0022 and Playlist.Datetimesong <\u0022{1}\u0022 and Playlist.duration>=90  GROUP BY PlayList.station_id) tsum ON radio.Id = tsum.station_id", DateTimeSQLiteChart(dtFrom), DateTimeSQLiteChart(dtTo));
+            for (int i = 0; i < items.Count(); i++)
+            {
+                if (!string.IsNullOrEmpty(items[i]))
+                {
+                    sb.AppendFormat(" left JOIN(SELECT PlayList.station_id, COUNT(PlayList.duration) AS t{0}sum FROM PlayList  JOIN Song ON PlayList.song_id = Song.Id where {1} = '{2}' and Playlist.Datetimesong >= \u0022{3}\u0022 and Playlist.Datetimesong < \u0022{4}\u0022 and Playlist.duration>=90 GROUP BY PlayList.station_id) t{0}sum ON radio.Id = t{0}sum.station_id", i, type, items[i], DateTimeSQLiteChart(dtFrom), DateTimeSQLiteChart(dtTo));
+                }
+            }
+            sb.AppendFormat(" GROUP BY radio.Name having radio.name like '{0}'", radiostation);
+            return sb;
+
+        }
+        public static StringBuilder BuildSelectForChartCount(string type, DateTime dtFrom, DateTime dtTo, string radiostation)
+        {
+            radiostation = radiostation.Replace("'", "''");
+            string[] items;
+            if (type == "Language")
+                items = new Crud().listLanguage;
+            else
+                items = new Crud().listCountry;
+            StringBuilder sb = new StringBuilder();
+            sb.Append(" SELECT radio.Name");
+            for (int i = 0; i < items.Count(); i++)
+            {
+                if (!string.IsNullOrEmpty(items[i]))
+                {
+                    items[i] = items[i].Replace("'", "''");
+                    sb.AppendFormat(" , printf(\u0022 % .2f\u0022, (printf(\u0022 % .2f\u0022, t{0}sum.t{0}sum)/printf(\u0022 % .2f\u0022, tsum.allsum))*100) as {1}", i, items[i]);
+                }
+            }
+
+            sb.AppendFormat(" FROM Radiostation radio left JOIN (SELECT PlayList.station_id, COUNT(PlayList.duration) AS allsum FROM PlayList  JOIN Song ON PlayList.song_id = Song.Id where Playlist.Datetimesong between \u0022{0}\u0022 and \u0022{1}\u0022 and Playlist.duration>=90 GROUP BY PlayList.station_id) tsum ON radio.Id = tsum.station_id", DateTimeSQLite(dtFrom), DateTimeSQLite(dtTo));
+            for (int i = 0; i < items.Count(); i++)
+            {
+                if (!string.IsNullOrEmpty(items[i]))
+                {
+                    sb.AppendFormat(" left JOIN(SELECT PlayList.station_id, COUNT(PlayList.duration) AS t{0}sum FROM PlayList  JOIN Song ON PlayList.song_id = Song.Id where {1} = '{2}' and Playlist.Datetimesong between \u0022{3}\u0022 and \u0022{4}\u0022 and Playlist.duration>=90 GROUP BY PlayList.station_id) t{0}sum ON radio.Id = t{0}sum.station_id", i, type, items[i], DateTimeSQLite(dtFrom), DateTimeSQLite(dtTo));
+                }
+            }
+            sb.AppendFormat(" GROUP BY radio.Name having radio.name like '{0}'", radiostation);
+            return sb;
+
+        }
+
         public static string DateTimeSQLiteChart(DateTime date)
         {
             return date.ToString("yyyy-MM-dd HH");

@@ -86,11 +86,11 @@
             // okBtn
             // 
             this.okBtn.Dock = System.Windows.Forms.DockStyle.Right;
-            this.okBtn.Location = new System.Drawing.Point(406, 0);
+            this.okBtn.Location = new System.Drawing.Point(393, 0);
             this.okBtn.Name = "okBtn";
-            this.okBtn.Size = new System.Drawing.Size(75, 25);
+            this.okBtn.Size = new System.Drawing.Size(88, 25);
             this.okBtn.TabIndex = 4;
-            this.okBtn.Text = "ОК";
+            this.okBtn.Text = "Завантажити";
             this.okBtn.UseVisualStyleBackColor = true;
             this.okBtn.Click += new System.EventHandler(this.okBtn_Click);
             // 
@@ -101,7 +101,7 @@
             this.cancelBtn.Name = "cancelBtn";
             this.cancelBtn.Size = new System.Drawing.Size(75, 25);
             this.cancelBtn.TabIndex = 5;
-            this.cancelBtn.Text = "Відміна";
+            this.cancelBtn.Text = "Закрити";
             this.cancelBtn.UseVisualStyleBackColor = true;
             this.cancelBtn.Click += new System.EventHandler(this.cancelBtn_Click);
             // 

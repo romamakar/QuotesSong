@@ -134,6 +134,7 @@ namespace QuotesSong.Forms
             if (cancelsource != null && token != null)
             {
                 toolStripStatusLabel1.Text = "Статус: Відмінено користувачем";
+                cancelBtn.Text = "Закрити";
                 cancelsource.Cancel();
                 cancelsource = null;
             }
@@ -144,6 +145,7 @@ namespace QuotesSong.Forms
         }
         private async void okBtn_Click(object sender, EventArgs e)
         {
+            bool checkBtn = false;
             if (Crud.CheckForInternetConnection())
             {
                 DisableEnableAllControls(false);
@@ -155,6 +157,7 @@ namespace QuotesSong.Forms
                     DriverService cd = Settings.Default.BrowserName == "Chrome" ? ChromeDriverService.CreateDefaultService(Settings.Default.BrowserBit) as DriverService : FirefoxDriverService.CreateDefaultService(Settings.Default.BrowserBit) as DriverService;
                     cd.HideCommandPromptWindow = true;
                     toolStripStatusLabel1.Text = "Статус: Відкриття браузера";
+                    cancelBtn.Text = "Відміна";
                     var taskdrv = Task<IWebDriver>.Factory.StartNew(() =>
                     {
                         try
@@ -169,6 +172,7 @@ namespace QuotesSong.Forms
                             toolStripProgressBar1.Value = 0;
                             toolStripProgressBar1.Visible = false;
                             toolStripStatusLabel1.Text = "Статус: Помилка під час завантаження";
+                            cancelBtn.Text = "Закрити";
                             MessageBox.Show("Помилка. Деталі:\n" + exec.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return null;
                         }
@@ -191,7 +195,12 @@ namespace QuotesSong.Forms
                                         toolStripStatusLabel1.Text = string.Empty;
                                     }
                                 }
-                                toolStripStatusLabel1.Text = "Статус: Готово";
+                                toolStripStatusLabel1.Text = "Статус: Успішно завантажено";
+                                for (int i = 0; i < radiosListBox.Items.Count; i++)
+                                {
+                                    radiosListBox.SetItemChecked(i, false);
+                                }
+                                checkBtn = true;
                                 toolStripProgressBar1.Visible = false;
                             }
                             catch (Exception ex)
@@ -199,6 +208,7 @@ namespace QuotesSong.Forms
                                 toolStripProgressBar1.Value = 0;
                                 toolStripProgressBar1.Visible = false;
                                 toolStripStatusLabel1.Text = "Статус: Помилка під час завантаження";
+                                cancelBtn.Text = "Закрити";
                                 MessageBox.Show("Помилка. Деталі:\n" + ex.Message, "Помилка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
                         }
@@ -206,6 +216,8 @@ namespace QuotesSong.Forms
                 }
                 webdrv = null;
                 DisableEnableAllControls(true);
+                if (checkBtn)
+                    okBtn.Enabled = false;
                 Crud.LoadEmptyLangWindow();
                 cancelsource = null;
             }

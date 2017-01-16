@@ -47,6 +47,7 @@
             this.langToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.weToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.countryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.selectedRowsLbl = new System.Windows.Forms.ToolStripStatusLabel();
             this.panel1.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
@@ -167,12 +168,14 @@
             this.mainGrid.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.mainGrid_CellEndEdit);
             this.mainGrid.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.mainGrid_DataError);
             this.mainGrid.DefaultValuesNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.dataGridView1_DefaultValuesNeeded);
+            this.mainGrid.SelectionChanged += new System.EventHandler(this.mainGrid_SelectionChanged);
             this.mainGrid.MouseClick += new System.Windows.Forms.MouseEventHandler(this.mainGrid_MouseClick);
             // 
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1});
+            this.toolStripStatusLabel1,
+            this.selectedRowsLbl});
             this.statusStrip1.Location = new System.Drawing.Point(0, 315);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(604, 22);
@@ -212,6 +215,12 @@
             this.countryToolStripMenuItem.Name = "countryToolStripMenuItem";
             this.countryToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
             this.countryToolStripMenuItem.Text = "Країна";
+            // 
+            // selectedRowsLbl
+            // 
+            this.selectedRowsLbl.Name = "selectedRowsLbl";
+            this.selectedRowsLbl.Size = new System.Drawing.Size(97, 17);
+            this.selectedRowsLbl.Text = "Виділено рядків:";
             // 
             // PlayListEditForm
             // 
@@ -261,5 +270,6 @@
         private System.Windows.Forms.ToolStripMenuItem weToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem countryToolStripMenuItem;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ToolStripStatusLabel selectedRowsLbl;
     }
 }

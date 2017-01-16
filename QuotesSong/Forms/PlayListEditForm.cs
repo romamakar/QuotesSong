@@ -297,8 +297,11 @@ namespace QuotesSong.Forms
             toolTip1.ShowAlways = true;
             toolTip1.IsBalloon = true;
             toolTip1.SetToolTip(this.label3, "Для швидкого редагування мов/країн виберіть стрічку\n та нажміть пр. кнопку миші\n(підтримується мультивибір через Ctrl або Shift)");
+        }        
+        private void mainGrid_SelectionChanged(object sender, EventArgs e)
+        {
+            selectedRowsLbl.Text = string.Format(" Виділено рядків: {0}", mainGrid.SelectedRows.Count);
         }
-
         #endregion
     }
 }

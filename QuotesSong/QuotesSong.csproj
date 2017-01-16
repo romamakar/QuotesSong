@@ -168,7 +168,9 @@
     <Content Include="WebDrivers\x86\chromedriver.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="WebDrivers\x86\geckodriver.exe" />
+    <Content Include="WebDrivers\x86\geckodriver.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="x64\SQLite.Interop.dll" />
     <Content Include="x86\SQLite.Interop.dll" />
     <EmbeddedResource Include="Forms\AboutBox.resx">

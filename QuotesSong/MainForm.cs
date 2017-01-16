@@ -6,6 +6,7 @@ using System.Data.SQLite;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
@@ -25,12 +26,17 @@ namespace QuotesSong
         private DataSet ds;
         private DataSet ds2;
         private DataSet ds3;
+        private StringBuilder mainGridSelect;
+        private StringBuilder mainChartAllDays;
+        private StringBuilder mainChartOneDay;
         #endregion
         public MainForm()
         {
             try
             {
                 InitializeComponent();
+                comboBoxQuota.SelectedItem = comboBoxQuota.Items[0];
+                comboQuotaChart.SelectedItem = comboQuotaChart.Items[0];
                 InitControls();
                 LoadData();
             }
@@ -45,7 +51,6 @@ namespace QuotesSong
         #region methods
         public void InitControls()
         {
-
             DateTime dt = DateTime.MinValue;
             cryteryCheckBoxTable.SelectedItem = cryteryCheckBoxTable.Items[0];
             cryteryComboChart.SelectedItem = cryteryComboChart.Items[0];
@@ -56,7 +61,7 @@ namespace QuotesSong
             stationComboChart.Items.AddRange(Crud.GetAllRadiostations().ToArray());
             if (stationComboChart.Items.Count > 0)
                 stationComboChart.SelectedItem = stationComboChart.Items[0];
-            radioComboTable.SelectedItem = radioComboTable.Items[0];
+            radioComboTable.SelectedItem = radioComboTable.Items[0];            
             dt = Crud.GetMinDate();
             if (dt == DateTime.MinValue)
             {
@@ -107,7 +112,7 @@ namespace QuotesSong
             return res;
         }
         public void LoadData()
-        {
+        {            
             DateTime dtfrom = dateTimePickerFromTable.Value.Date;
             DateTime dtto = dateTimePickerToTable.Value.Date.AddHours(23).AddMinutes(59);
             if (!setTimeCheckBox.Checked)
@@ -120,12 +125,20 @@ namespace QuotesSong
                 dtfrom = dateTimePickerFromTable.Value.Date.AddHours(timePickerFromTable.Value.Hour).AddMinutes(timePickerFromTable.Value.Minute);
                 dtto = dateTimePickerFromTable.Value.Date.AddHours(timePickerToTable.Value.Hour).AddMinutes(timePickerToTable.Value.Minute);
             }
+            if (comboBoxQuota.Text == "тривалості")
+            {
+                mainGridSelect = Crud.BuildSelectForMainSum(cryteryCheckBoxTable.Text == "Мова" ? "Language" : "Country", dtfrom, dtto);
+            }
+            else
+            {
+                mainGridSelect = Crud.BuildSelectForMainCount(cryteryCheckBoxTable.Text == "Мова" ? "Language" : "Country", dtfrom, dtto);
+            }
             using (var con = new SQLiteConnection())
             {
                 ds = new DataSet();
                 con.ConnectionString = Settings.Default.SongDBConnectionString;
                 con.Open();
-                using (var adap = new SQLiteDataAdapter(Crud.BuildSelectForMain(cryteryCheckBoxTable.Text == "Мова" ? "Language" : "Country", dtfrom, dtto), con))
+                using (var adap = new SQLiteDataAdapter(mainGridSelect.ToString(), con))
                 {
                     adap.Fill(ds, "Radiostations");
                 }
@@ -179,7 +192,15 @@ namespace QuotesSong
                 {
                     for (int i = 1; i <= 24; i++)
                     {
-                        using (var adap = new SQLiteDataAdapter(Crud.BuildSelectForChartOneDay(cryteryComboChart.Text == "Мова" ? "Language" : "Country", dateTimePickerFromChart.Value.Date.AddHours(i - 1), dateTimePickerFromChart.Value.Date.AddHours(i), stationComboChart.Text), con))
+                        if (comboQuotaChart.Text == "тривалості")
+                        {
+                            mainChartOneDay = Crud.BuildSelectForChartOneDaySum(cryteryComboChart.Text == "Мова" ? "Language" : "Country", dateTimePickerFromChart.Value.Date.AddHours(i - 1), dateTimePickerFromChart.Value.Date.AddHours(i), stationComboChart.Text);
+                        }
+                        else
+                        {
+                            mainChartOneDay = Crud.BuildSelectForChartOneDayCount(cryteryComboChart.Text == "Мова" ? "Language" : "Country", dateTimePickerFromChart.Value.Date.AddHours(i - 1), dateTimePickerFromChart.Value.Date.AddHours(i), stationComboChart.Text);
+                        }
+                        using (var adap = new SQLiteDataAdapter(mainChartOneDay.ToString(), con))
                         {
                             adap.Fill(ds2, "Radiostations");
                         }
@@ -195,7 +216,15 @@ namespace QuotesSong
                 {
                     for (int i = 0; i <= (dateTimePickerToChart.Value.Date - dateTimePickerFromChart.Value.Date).Days; i++)
                     {
-                        using (var adap = new SQLiteDataAdapter(Crud.BuildSelectForChart(cryteryComboChart.Text == "Мова" ? "Language" : "Country", dateTimePickerFromChart.Value.Date.AddDays(i), dateTimePickerFromChart.Value.Date.AddDays(i + 1).AddSeconds(-1), stationComboChart.Text), con))
+                        if (comboQuotaChart.Text == "тривалості")
+                        {
+                            mainChartAllDays = Crud.BuildSelectForChartSum(cryteryComboChart.Text == "Мова" ? "Language" : "Country", dateTimePickerFromChart.Value.Date.AddDays(i), dateTimePickerFromChart.Value.Date.AddDays(i + 1).AddSeconds(-1), stationComboChart.Text);
+                        }
+                        else
+                        {
+                            mainChartAllDays = Crud.BuildSelectForChartCount(cryteryComboChart.Text == "Мова" ? "Language" : "Country", dateTimePickerFromChart.Value.Date.AddDays(i), dateTimePickerFromChart.Value.Date.AddDays(i + 1).AddSeconds(-1), stationComboChart.Text);
+                        }
+                        using (var adap = new SQLiteDataAdapter(mainChartAllDays.ToString(), con))
                         {
                             adap.Fill(ds2, "Radiostations");
                         }
@@ -479,14 +508,14 @@ namespace QuotesSong
             {
                 float quotes = cryteryCheckBoxTable.Text == "Країна" ? Settings.Default.quotesUkrCountry : Settings.Default.quotesUkrLang;
                 string nametype = cryteryCheckBoxTable.Text == "Країна" ? "Україна" : "Українська";
-                foreach (DataGridViewRow data in mainGrid.Rows.Cast<DataGridViewRow>().Where(x=>x.Visible==true))
+                foreach (DataGridViewRow data in mainGrid.Rows.Cast<DataGridViewRow>().Where(x => x.Visible == true))
                 {
                     float percent;
                     if (float.TryParse(data.Cells[nametype].Value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out percent))
                     {
                         data.Visible = quotes > percent;
                     }
-                }              
+                }
             }
             else
             {
@@ -512,6 +541,8 @@ namespace QuotesSong
             toolStripStatusLabel1.Text = string.Format("Кількість записів: {0}", mainGrid.Rows.Cast<DataGridViewRow>().Where(y => y.Visible == true).Count());
         }
         #endregion
+
+
     }
 }
 
